@@ -1,0 +1,25 @@
+Package: cisREAD
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person("Amber", "Emmett", , "amber.m.l.emmett@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: cisREAD identifies communities of gene-specific cis-Regulatory Elements Across Differentiation.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Depends: 
+    R (>= 3.0.2)
+LazyData: true
+biocViews:
+Imports:
+    dplyr (>= 1.0.6),
+    sqldf,
+    biomaRt,
+    igraph (>= 1.2.6),
+    ggplot2 (>= 3.3.3),
+    glmnet (>= 4.1-1),
+    selectiveInference (>= 1.2.5),
+    magrittr
