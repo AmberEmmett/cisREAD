@@ -46,6 +46,7 @@
 #' head(results$selected_coCREs)
 #' Look at significant (co)CREs
 #' head(results$significant_coCREs)
+#' @export
 cisREAD <- function(peaks,
                     TFprofile,
                     RNA,
