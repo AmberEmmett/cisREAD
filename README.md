@@ -5,8 +5,8 @@ cisREAD (cis Regualtory Elements Across Differentiation) is an R package designe
 
 cisREAD can be installed using devtools
 
-devtools::install_github("AmberEmmett/cisREAD")
-library(cisREAD)
+    devtools::install_github("AmberEmmett/cisREAD")
+    library(cisREAD)
 
 # Inputs
 
