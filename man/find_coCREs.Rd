@@ -2,9 +2,7 @@
 % Please edit documentation in R/find_coCREs.R
 \name{find_coCREs}
 \alias{find_coCREs}
-\title{Find communities of Cis-Regulatory-Elements (coCREs)
-This function finds communities of co-accessible and co-bound cis-regulatory elements using infomap
-community detection}
+\title{Find communities of Cis-Regulatory-Elements (coCREs)}
 \usage{
 find_coCREs(
   peaks2genes,
@@ -13,7 +11,7 @@ find_coCREs(
   distance = 1e+05,
   minTFevents = 2,
   coCREcutoff = 0.3,
-  weights = c(1, 1)
+  coCREgroupings = c("integrated", "ATAC", "TF")
 )
 }
 \arguments{
@@ -33,17 +31,17 @@ this number of 1's in the TFprofile matrix (default 2)}
 
 \item{coCREcutoff}{The minimum similarity score (TF footprint dice similarity * ATAC-seq pearson correlation)
 used to draw an edge between two candidate CREs in network construction. Should be a value between 0 and 1
-(default 0.3), ower values will result in looser communities and higher values in tighter communities}
+(default 0.3), lower values will result in looser communities and higher values in tighter communities}
 
-\item{weights}{A vector giving the weights assigned to TF similarity (1st value) and chromatin accessibility
-correlation (2nd value). The defualt - c(1,1) - gives equal weighting to both, using c(0,1) would perform
-community detection solely on chromatin accessibility}
+\item{coCREgroupings}{Whether to perform community detection based  on ATAC-seq correlation ("ATAC"),  TF
+binding similarity ("TF"), or integrated similarity ("integrated") - defined as ATAC-seq correlation * TF similarity
+(default = "integrated"). Using "ATAC" or "TF" will result in detection of looser communities than "integrated",
+it is therefore recommended to raise the "coCREcutoff" parameter to compensate.}
 }
 \value{
 A find_coCREsResult object, listing candidate CRE communities, their TFs, and accessibilites
 }
 \description{
-Find communities of Cis-Regulatory-Elements (coCREs)
 This function finds communities of co-accessible and co-bound cis-regulatory elements using infomap
-community detection
+community detection.
 }

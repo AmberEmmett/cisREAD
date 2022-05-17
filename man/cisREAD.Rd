@@ -2,9 +2,7 @@
 % Please edit documentation in R/cisREAD.R
 \name{cisREAD}
 \alias{cisREAD}
-\title{Performs the cisREAD workflow in one step upon a list of genes, from ATAC-seq , RNA-seq and TF footprint inputs
-This function is a wrapper of map_peaks2genes, find_coCREs and select_coCREs which can be iterated over a list
-of genes.}
+\title{Performs the cisREAD workflow in one step upon a list of genes, from ATAC-seq , RNA-seq and TF footprint inputs}
 \usage{
 cisREAD(
   peaks,
@@ -68,7 +66,6 @@ significant}
 A cisREADResult object, listing significant, selected and all candidate CRE communities
 }
 \description{
-Performs the cisREAD workflow in one step upon a list of genes, from ATAC-seq , RNA-seq and TF footprint inputs
 This function is a wrapper of map_peaks2genes, find_coCREs and select_coCREs which can be iterated over a list
 of genes.
 }

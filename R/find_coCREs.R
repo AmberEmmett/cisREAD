@@ -14,10 +14,11 @@
 #' this number of 1's in the TFprofile matrix (default 2)
 #' @param coCREcutoff The minimum similarity score (TF footprint dice similarity * ATAC-seq pearson correlation)
 #' used to draw an edge between two candidate CREs in network construction. Should be a value between 0 and 1
-#' (default 0.3), ower values will result in looser communities and higher values in tighter communities
-#' @param weights A vector giving the weights assigned to TF similarity (1st value) and chromatin accessibility
-#' correlation (2nd value). The defualt - c(1,1) - gives equal weighting to both, using c(0,1) would perform
-#' community detection solely on chromatin accessibility
+#' (default 0.3), lower values will result in looser communities and higher values in tighter communities
+#' @param coCREgroupings Whether to perform community detection based  on ATAC-seq correlation ("ATAC"),  TF
+#' binding similarity ("TF"), or integrated similarity ("integrated") - defined as ATAC-seq correlation * TF similarity
+#' (default = "integrated"). Using "ATAC" or "TF" will result in detection of looser communities than "integrated", 
+#' it is therefore recommended to raise the "coCREcutoff" parameter to compensate.
 #' @return A find_coCREsResult object, listing candidate CRE communities, their TFs, and accessibilites
 #' @example 
 #' head(peaks2genes)
@@ -31,7 +32,8 @@
 #' Look at coCRE TF footprints
 #' head(PRDM1_coCREs$coCRE_TFs)
 #' @export
-find_coCREs <- function(peaks2genes, TFprofile, gene, distance=100000, minTFevents=2, coCREcutoff=0.3, weights = c(1,1)) {
+find_coCREs <- function(peaks2genes, TFprofile, gene, distance=100000, minTFevents=2, coCREcutoff=0.3, 
+                        coCREgroupings = c("integrated", "ATAC", "TF")) {
 
   params <- list(gene = gene, distance = distance, minTFevents = minTFevents, coCREcutoff = coCREcutoff)
 
@@ -73,7 +75,21 @@ find_coCREs <- function(peaks2genes, TFprofile, gene, distance=100000, minTFeven
   TFSimilarity <- as.matrix(1 - arules::dissimilarity(TF, method = "dice"))
 
   #Network construction
-  coCREEdges <- ((weights[1] * TFSimilarity) * (weights[2] * cCRECorrelation))
+  
+  if(missing(coCREgroupings)) {
+    coCREgroupings <- "integrated"
+  }
+  
+  if (coCREgroupings == "integrated") {
+    coCREEdges <- TFSimilarity * cCRECorrelation
+  } else if (coCREgroupings == "ATAC") {
+    coCREEdges <- cCRECorrelation
+  } else if (coCREgroupings == "TF") {
+    coCREEdges <- TFSimilarity
+  } else {
+    warning("coCREgroupings must be one of: 'ATAC', 'TF', or 'integrated' (default). \n")
+  }
+    
   diag(coCREEdges) <- 1
   coCREEdges <- coCREEdges[occupiedcCREs, occupiedcCREs]
   coCREEdges[coCREEdges <= coCREcutoff] <- 0

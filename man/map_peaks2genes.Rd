@@ -2,9 +2,7 @@
 % Please edit documentation in R/map_peaks2genes.R
 \name{map_peaks2genes}
 \alias{map_peaks2genes}
-\title{Map ATAC-seq peaks to nearby genes
-This function maps accessible genomic regions to protein coding genes
-within a given distance.}
+\title{Map ATAC-seq peaks to nearby genes}
 \usage{
 map_peaks2genes(peaks, genome = "hg38", distance = 1e+05)
 }
@@ -23,7 +21,6 @@ A dataframe where each peak is mapped to all genes within
 the given distance
 }
 \description{
-Map ATAC-seq peaks to nearby genes
 This function maps accessible genomic regions to protein coding genes
 within a given distance.
 }

@@ -2,9 +2,7 @@
 % Please edit documentation in R/select_coCREs.R
 \name{select_coCREs}
 \alias{select_coCREs}
-\title{Selects cis-regulatory elements and cis-regualtory communities to regulate a gene
-This function finds CREs and coCREs whose chromatin accessibility best predicts the expresion of a target
-gene using LASSO regression. This should be used downstream of 'find_coCREs'}
+\title{Selects cis-regulatory elements and cis-regulatory communities to regulate a gene}
 \usage{
 select_coCREs(
   coCREs,
@@ -36,7 +34,6 @@ A select_coCREsResult object, listing selected CRE communities, their TFs and ac
 the glmnet model object, inputs and coefficients
 }
 \description{
-Selects cis-regulatory elements and cis-regualtory communities to regulate a gene
 This function finds CREs and coCREs whose chromatin accessibility best predicts the expresion of a target
 gene using LASSO regression. This should be used downstream of 'find_coCREs'
 }
