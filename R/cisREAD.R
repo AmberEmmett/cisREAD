@@ -20,9 +20,10 @@
 #' @param coCREcutoff The minimum similarity score (TF footprint dice similarity * ATAC-seq pearson correlation)
 #' used to draw an edge between two candidate CREs in network construction. Should be a value between 0 and 1
 #' (default 0.3), ower values will result in looser communities and higher values in tighter communities
-#' @param weights A vector giving the weights assigned to TF similarity (1st value) and chromatin accessibility
-#' correlation (2nd value). The defualt - c(1,1) - gives equal weighting to both, using c(0,1) would perform
-#' community detection solely on chromatin accessibility
+#' @param coCREgroupings Whether to perform community detection based  on ATAC-seq correlation ("ATAC"),  TF
+#' binding similarity ("TF"), or integrated similarity ("integrated") - defined as ATAC-seq correlation * TF similarity
+#' (default = "integrated"). Using "ATAC" or "TF" will result in detection of looser communities than "integrated", 
+#' it is therefore recommended to raise the "coCREcutoff" parameter to compensate.
 #' @param lambda The value of lambda used for model selection during cross-validation, one of 
 #' "lambda_min" (default) and "lambda_se". "lambda_min" will construct the model with the mean
 #' minimum cross-validated squared error, "lambda_se" will construct the model within 1 standard error 
@@ -55,7 +56,7 @@ cisREAD <- function(peaks,
                     distance = 100000,
                     minTFevents=2,
                     coCREcutoff=0.3,
-                    weights = c(1,1),
+                    coCREgroupings = c("integrated", "ATAC", "TF"),
                     lambda = c("lambda_min", "lambda_se"),
                     pval = 0.05,
                     padj = 0.05) {
@@ -71,7 +72,7 @@ cisREAD <- function(peaks,
                        distance = distance,
                        minTFevents = minTFevents,
                        coCREcutoff = coCREcutoff,
-                       weights = c(1,1))
+                       coCREgroupings = coCREgroupings)
 
   print("Selecting candidate cis-regulatory communities")
   selected_list <- lapply(coCRE_list,
