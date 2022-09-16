@@ -71,7 +71,7 @@ After identifying CRE communities for each gene, we now narrow down this list by
 
 To determine the degree of shrinkage in a LASSO model we fine-tune the tuning-paramater lambda, to find the model which results in the minimum mean squared cross-validated error 'lambda_min'). If we want a sparser model, we can also use 'lambda se', which is in one standard error of 'lambda_min' With plot == TRUE we can plot the relationship between lambda and number of coefficients. LASSO regression is implemented using [glmnet](https://glmnet.stanford.edu/articles/glmnet.html). 
 
-After model selection by cross validation, and variable selection, we then test the significance of each predictor, accounting for the selection event using a selective inference approach (implemented in [selectiveInference](https://github.com/selective-inference/R-software).
+After model selection by cross validation, and variable selection, we then test the significance of each predictor, accounting for the selection event using a selective inference approach (implemented using [selectiveInference](https://github.com/selective-inference/R-software)).
 
 This can all be performed with the select_coCREs function.
 
