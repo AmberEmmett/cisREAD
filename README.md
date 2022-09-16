@@ -3,7 +3,7 @@ cisREAD (cis-Regualtory Elements Across Differentiation) is an R package designe
 
 # Installation
 
-cisREAD can be installed using devtools
+cisREAD, and its dependancies, can be installed using [devtools](https://devtools.r-lib.org/):
 
     devtools::install_github("AmberEmmett/cisREAD")
     library(cisREAD)
@@ -20,18 +20,18 @@ cisREAD requires the following three input files:
 
 # Usage
 
-cisREAD can either be ran on genes one-by-one in a stepwise fashion, or iterated over a large list of genes. We recommend first running the workflow manually, to optimise community detection parameters and check model fit. This is demonstrated below.
+cisREAD can either be ran on genes one-by-one in a stepwise fashion, or iterated over a large list of genes. We recommend first running the workflow manually on a handful of test genes, to optimise parameters and check that the method works for your data. However if you're in a hurry scroll down to the bottom of the page and take a peak at the last section: 'Applying cisREAD to a list of genes'.
 
 ## Step 1. Mapping peaks to genes (map_peaks2genes)
 
-To identify genes near candidate CREs, we first map each ATAC-seq peak to every gene within a user-specified distance, we recommend finding CREs within 100kb of a protein coding TSS. Peak-gene mapping relies on data from ENSEMBL, so please make sure your gene IDs are converted to ENSEMBL identifiers if necessary. Currently only the hg38/GrCh38 annotation of the human genome is supported.
+To identify genes near candidate CREs, we first map each ATAC-seq peak to every gene within a user-specified distance, we recommend finding CREs within 100kb of a protein coding TSS. Peak-gene mapping relies on data from ENSEMBL, so please make sure your gene IDs are converted to ENSEMBL identifiers if necessary. Currently only the hg38 annotation of the human genome is supported.
 
     peaks2genes <- map_peaks2genes(peaks = ATAC_peaks, genome = "hg38", distance = 100000)
     head(peaks2genes)
 
 ## Step 2. Finding Communities of Cis-Regulatory Elements (coCREs)
 
-We can now look at the candidate CREs mapped to a gene, and identify those which regulate transcription together. To do this we calculate the chromatin accessibility correlation, and transcription factor occupancy similarity for ever possible pair of candidate CREs, and produce an integrated similarity score. We can then draw edges between candidate CREs whose score exceeds a threshold and construct a network. Infomap community detection, implemented in igraph, is then used to identify communities of connected regulatory elements. These represent co-acting CREs, which are accessible in the same differentiation stages, and occupied by common TFs. To detect coCREs, we use the find_coCREs function.
+We can now look at the candidate CREs mapped to a gene, and identify those which regulate transcription together. To do this we calculate the chromatin accessibility correlation, and transcription factor occupancy similarity for ever possible pair of candidate CREs, and produce an integrated similarity score. We can then draw edges between candidate CREs whose score exceeds a threshold and construct a network. Infomap community detection, implemented in [igraph](https://igraph.org/r/), is then used to identify communities of connected regulatory elements. These represent co-acting CREs, which are accessible in the same differentiation stages, and occupied by common TFs. To detect coCREs, we use the find_coCREs function.
 
 find_coCREs has a number of adjustable parameters which influence how communities are detected, these are:
 
@@ -58,12 +58,10 @@ Lets have a go
     PRDM1_coCREs$coCRE_Accessibility
 
 
-You can also extract the igraph communities and network objects, take a look through the igraph manual links to see what information is stored in each (also take a look at the plotting options.)
+You can also extract the igraph [communities](https://igraph.org/r/doc/communities.html) and [(plottable) network graph](https://igraph.org/r/doc/plot.common.html)
 
-    #Extract igraph communities
     PRDM1_coCREs$coCRE_communities
     
-    #Extract the igraph network, and plot
     PRDM1_coCRE_network <- PRDM1_coCREs$coCRE_network
     plot(PRDM1_coCRE_network)
     
@@ -71,9 +69,9 @@ You can also extract the igraph communities and network objects, take a look thr
 
 After identifying CRE communities for each gene, we now narrow down this list by selecting those whose chromatin accessibility best predicts gene expression with LASSO regression. In these models, each candidate (co)CREs chromatin accessibility is an independent variable (X), and each gene's expression is the dependent variable (Y.) LASSO penalises regression co-efficients by assigning them a beta equal to the absolute magnitude of the coefficient. This enables less predictive coefficients to be shrunk towards zero and eliminated from the model, the remaining X variables are considered to be selected.
 
-To determine the degree of shrinkage in a LASSO model we fine-tune the tuning-paramater lambda, to find the model which results in the minimum mean squared cross-validated error 'lambda_min'). If we want a sparser model, we can also use 'lambda se', which is in one standard error of 'lambda_min' With plot == TRUE we can plot the relationship between lambda and number of coefficients.
+To determine the degree of shrinkage in a LASSO model we fine-tune the tuning-paramater lambda, to find the model which results in the minimum mean squared cross-validated error 'lambda_min'). If we want a sparser model, we can also use 'lambda se', which is in one standard error of 'lambda_min' With plot == TRUE we can plot the relationship between lambda and number of coefficients. LASSO regression is implemented using [glmnet](https://glmnet.stanford.edu/articles/glmnet.html). 
 
-After model selection by cross validation, and variable selection, we then test the significance of each predictor, accounting for the selection event using a selective inference approach.
+After model selection by cross validation, and variable selection, we then test the significance of each predictor, accounting for the selection event using a selective inference approach (implemented in [selectiveInference](https://github.com/selective-inference/R-software).
 
 This can all be performed with the select_coCREs function.
 
