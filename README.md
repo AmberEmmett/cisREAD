@@ -1,5 +1,5 @@
 # cisREAD
-cisREAD (cis Regualtory Elements Across Differentiation) is an R package designed to identify lineage-specific cis-regulatory elements from ATAC-seq and RNA-seq datasets
+cisREAD (cis-Regualtory Elements Across Differentiation) is an R package designed to identify lineage-specific cis-regulatory elements from ATAC-seq and RNA-seq datasets
 
 # Installation
 
@@ -31,29 +31,55 @@ To identify genes near candidate CREs, we first map each ATAC-seq peak to every 
 
 ## Step 2. Finding Communities of Cis-Regulatory Elements (coCREs)
 
-We can now look at the candidate CREs mapped to a gene, and identify those which regulate transcription together. To do this we calculate the chromatin accessibility correlation, and transcription factor occupancy similarity for ever possible pair of candidate CREs, and produce an integrated similarity score. We can then draw edges between candidate CREs whose score exceeds a threshold and construct a network. Infomap community detection, is then used to identify communities of connected regulatory elements. These represent co-acting CREs, which are accessible in the same differentiation stages, and occupied by common TFs. To detect coCREs, we use the find_coCREs function.
-
-    find_coCREs(peaks2genes = peaks2genes, TFprofile = TF_footprints, gene = "PRDM1")
+We can now look at the candidate CREs mapped to a gene, and identify those which regulate transcription together. To do this we calculate the chromatin accessibility correlation, and transcription factor occupancy similarity for ever possible pair of candidate CREs, and produce an integrated similarity score. We can then draw edges between candidate CREs whose score exceeds a threshold and construct a network. Infomap community detection, implemented in igraph, is then used to identify communities of connected regulatory elements. These represent co-acting CREs, which are accessible in the same differentiation stages, and occupied by common TFs. To detect coCREs, we use the find_coCREs function.
 
 find_coCREs has a number of adjustable parameters which influence how communities are detected, these are:
 
 - coCREcutoff - The minimum integrated similarity score needed to draw an edge (default 0.3) - lower values result in looser, less similar coCREs, and higher values result in tighter, more similar coCREs.
 - minTFevents - The minimum number of TF occupancy events (i.e. 1's in the TF occupancy matrix) needed for each candidate CRE to be taken forward to community detection. This removes candidate CREs from the network which are infrequently TF-bound.
 - coCRE_groupings - whether to group CREs based on chromatin accessibility correlation ('ATAC'), transcription factor binding events ('TF'), or integrated similarity scores ('integrated'). The default "integrated" scores are calculated through mutliplying chromatin accessibility correlation by transcription factor binding similarity. 
+
+Lets have a go
+
+    coCREs <- find_coCREs(peaks2genes = peaks2genes, TFprofile = TF_footprints, gene = "PRDM1")
+    
+  Afterwards we can look at the CREs grouped into communites, the transcription factors bound by each community member, and the accessibility of each community member
+  
+    #Show all gene-specific candidates
+    PRDM1_coCREs$cCREs
+
+    #Show communites of cis-regulatory elements (coCREs)
+    PRDM1_coCREs$coCREs
+    
+    #Show their TF occupancy events
+    PRDM1_coCREs$coCRE_TFs
+
+    #Show their chromatin accessibility profiles
+    PRDM1_coCREs$coCRE_Accessibility
+
+
+You can also extract the igraph communities and network objects, take a look through the igraph manual links to see what information is stored in each (also take a look at the plotting options.)
+
+    #Extract igraph communities
+    PRDM1_coCREs$coCRE_communities
+    
+    #Extract the igraph network, and plot
+    PRDM1_coCRE_network <- PRDM1_coCREs$coCRE_network
+    plot(PRDM1_coCRE_network)
     
 ## Step 3. Selecting gene-specific (co)CREs with LASSO Regression
 
 After identifying CRE communities for each gene, we now narrow down this list by selecting those whose chromatin accessibility best predicts gene expression with LASSO regression. In these models, each candidate (co)CREs chromatin accessibility is an independent variable (X), and each gene's expression is the dependent variable (Y.) LASSO penalises regression co-efficients by assigning them a beta equal to the absolute magnitude of the coefficient. This enables less predictive coefficients to be shrunk towards zero and eliminated from the model, the remaining X variables are considered to be selected.
 
-To determine the degree of shrinkage in a LASSO model we fine-tune the tuning-paramater lambda, to find the model which results in the minimum mean squared cross-validated error ('lambda_min'). If we want a sparser model, we can also use "lambda se", which is in one standard error of "lambda_min." With plot == TRUE we can plot the relationship between lambda and number of coefficients.
+To determine the degree of shrinkage in a LASSO model we fine-tune the tuning-paramater lambda, to find the model which results in the minimum mean squared cross-validated error 'lambda_min'). If we want a sparser model, we can also use 'lambda se', which is in one standard error of 'lambda_min' With plot == TRUE we can plot the relationship between lambda and number of coefficients.
 
 After model selection by cross validation, and variable selection, we then test the significance of each predictor, accounting for the selection event using a selective inference approach.
 
 This can all be performed with the select_coCREs function.
 
-    PRDM1_selected <- select_coCREs(coCREs = PRDM1_coCREs, RNA = gene_expression, lambda = "lambda_min", pval = 0.05)
+    PRDM1_selected <- select_coCREs(coCREs = PRDM1_coCREs, RNA = gene_expression, lambda = 'lambda_min', pval = 0.05)
 
-We can now examine properties of the predicted (co)CREs.
+We can now examine properties of the selected (co)CREs like before.
 
     #Show selected coCREs
     PRDM1_selected$selected_coCREs
@@ -61,9 +87,30 @@ We can now examine properties of the predicted (co)CREs.
     #Show their TF occupancy events
     PRDM1_selected$selected_coCRE_TFs
 
-   #Show their chromatin accessibility profiles
-   PRDM1_selected$selected_coCRE_Accessibility
+    #Show their chromatin accessibility profiles
+    PRDM1_selected$selected_coCRE_Accessibility
+
 
 ## Applying cisREAD to a list of genes
 
-To identify cis-regulatory elements across differentiation for a large list of genes, we can use the all-in-one function 'cisREAD'. 
+To identify cis-regulatory elements across differentiation for a large list of genes, such as genes differentially expressed across the lineage, we can use the all-in-one function 'cisREAD'. The cisREAD function is a wrapper of the above three functions and accepts all paramaters for map_peaks2genes, find_coCREs and select_coCREs (aside from plot, which is switched off). There is also an additional paramater "padj" which determines the FDR cut-off after Benjamini-Hochberg correction for each model created. Use cisREAD to apply the method to a character vector of gene symbols like below:
+
+    #Define a gene list
+    gene_list <- c("PRDM1", "XBP1", "IRF4", "PAX5", "BCL6", "SPI1")
+    
+    #Apply cisREAD
+    cisREAD_CREs <- cisREAD(peaks = ATAC_peaks, genome = "hg38", distance = 100000, TFprofile = TF_footprints, genes = gene_list, RNA = gene_expression, lambda = "lambda_min, pval = 0.05, padj = 0.05)
+    
+  Tada! You can then extract candidate CREs for each gene, candidate CRE communities and selected coCREs.
+  
+      #Show candidate CREs
+      cisREAD_CREs$cCREs
+      
+      #Show coCREs
+      cisREAD_CREs$coCREs
+      #Show selected coCREs
+      cisREAD_CREs$selected_coCREs
+      
+      #Show significnat coCREs
+      cisREAD_CREs$significant_coCREs
+      
