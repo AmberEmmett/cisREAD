@@ -22,4 +22,5 @@ Imports:
     ggplot2 (>= 3.3.3),
     glmnet (>= 4.1-1),
     selectiveInference (>= 1.2.5),
-    magrittr
+    magrittr,
+    arules
