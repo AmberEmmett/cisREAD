@@ -1,4 +1,4 @@
-#' Selects cis-regulatory elements and cis-regualtory communities to regulate a gene
+#' Selects cis-regulatory elements and cis-regulatory communities to regulate a gene
 
 #' This function finds CREs and coCREs whose chromatin accessibility best predicts the expresion of a target
 #' gene using LASSO regression. This should be used downstream of 'find_coCREs'
@@ -158,7 +158,7 @@ select_coCREs <- function(coCREs, RNA, lambda = c("lambda_min", "lambda_se") , p
       selected_coCREs$PValue <- NA
       selected_coCREs <- dplyr::left_join(selected_coCREs, coCREs$coCREs, by = "coCRE")
 
-    } else if (is.na(pval)) {
+    } else if (is.na(head(pval, 1))) {
 
       selected_coCREs$PValue <- NA
       selected_coCREs <- dplyr::left_join(selected_coCREs, coCREs$coCREs, by = "coCRE")
