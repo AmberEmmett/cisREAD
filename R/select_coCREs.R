@@ -72,7 +72,7 @@ select_coCREs <- function(coCREs, RNA, lambda = c("lambda_min", "lambda_se") , p
     }
   )
 
-  suppressWarnings(if (is.na(model)) return(NULL))
+  if (is.na(head(model, 1))) return(NULL)
 
   #LASSO CV
   cv_model <- tryCatch(
@@ -94,7 +94,7 @@ select_coCREs <- function(coCREs, RNA, lambda = c("lambda_min", "lambda_se") , p
     }
   )
 
-  suppressWarnings(if (is.na(cv_model)) return(NULL))
+  if (is.na(head(cv_model, 1))) return(NULL)
 
   #Plot
   if (plot == TRUE) {
