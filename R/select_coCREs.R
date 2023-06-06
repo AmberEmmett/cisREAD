@@ -126,7 +126,6 @@ select_coCREs <- function(coCREs, RNA, lambda = c("lambda_min", "lambda_se") , p
                               x = z_coCRESignal,
                               y = z_gene_exp,
                               exact = TRUE,
-                              s = opt_lambda/nCells,
                               standardize = FALSE,
                               thresh = 1e-20)[-1]
 
@@ -137,10 +136,8 @@ select_coCREs <- function(coCREs, RNA, lambda = c("lambda_min", "lambda_se") , p
       pval <- suppressWarnings(selectiveInference::fixedLassoInf(x = z_coCRESignal,
                                                                  y = z_gene_exp,
                                                                  beta = beta,
-                                                                 lambda = opt_lambda,
+                                                                 lambda = opt_lambda*nCells,
                                                                  alpha = pval,
-                                                                 tol.beta = 0.1,
-                                                                 tol.kkt = 0.1,
                                                                  sigma = sigma$sigmahat))
     },
 
